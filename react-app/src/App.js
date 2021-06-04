@@ -1,6 +1,6 @@
 import './App.css';
 import React from 'react';
-import Sunburst from './Visualization.js';
+import Sunburst from './ZoomableSunburst.js';
 
 
 
