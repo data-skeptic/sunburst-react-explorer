@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Sunburst from './Visualization.js';
+import Sunburst from './ZoomableSunburst';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
