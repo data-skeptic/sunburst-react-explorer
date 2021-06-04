@@ -17,14 +17,12 @@ class ZoomableSunburst extends Component {
 
             var currentDepth = 0; 
 
-            const svg = d3.select("body")
-            .append("svg")
-            .attr("width", width)
-            .attr("height", width)
-            .style("border", "2px solid lightgrey")
-            .style("margin", "50px")
+            const svg = d3.select("body").append("svg")
+                .attr("width", width)
+                .attr("height", width)
+                .style("border", "2px solid lightgrey")
+                .style("margin", "50px")
 
-            console.log(data);
             const root = d3.hierarchy(data)
                 .sum(d => d.value)
                 .sort((a, b) => b.value - a.value);
@@ -36,6 +34,10 @@ class ZoomableSunburst extends Component {
             const g = svg.append("g")
                 .attr("transform", `translate(${width / 2},${width / 2})`);
 
+            const colorScale = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
+
+
+            var totalList = root.descendants();
             var currentList = root.descendants();
 
             var current1 = currentList.filter( (d) => {
@@ -45,42 +47,141 @@ class ZoomableSunburst extends Component {
                 return d['depth'] == currentDepth + 2;
             });
 
-            console.log(current2);
+            console.log(currentList);
 
-            const colorScale = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
-
-            current1.forEach( (d,i)=>{
-                g.append("path")
+            
+            function createSunburst(rootName){
+                d3.selectAll("g > *").remove();
+                console.log(rootName);
+                var root = totalList.filter( (d) => {
+                    return d.data.name == rootName;
+                });
+                root = root[0];
+                console.log("newStart");
+                console.log(root);
+                var current1 = root.children;
+                console.log(current1);
+                var current2 = [];
+                if (typeof current1 !== "undefined" && current1 != []){
+                    current1.forEach( (d,i)=>{
+                        if (typeof d.children !== "undefined"){
+                            d.children.forEach( (d,i)=>{
+                                current2.push(d);
+                            });
+                        }
+                    });
+                }
+                console.log(current2);
+                
+                var parentName = null;
+                if (root.parent !== null) {
+                    parentName = root.parent.data.name;
+                }
+                let rootCircle = g.append("path")
                         .attr("class", "arc")
-                        .attr("fill", colorScale(d.data.name))
-                        .attr("fill-opacity", .6)
+                        .attr("fill", colorScale(root.data.name))
+                        .attr("fill-opacity", .2)
                         .attr("stroke","black")
-                        .attr("stroke-width", 1)
+                        .attr("stroke-width", 0)
+                        .attr("name", parentName)
                         .attr("opacity", 0.5)
                         .attr("d", d3.arc()
-                            .innerRadius(100)
-                            .outerRadius(200)
-                            .padAngle(Math.min((d.current.x1 - d.current.x0) / 2, 0.005))
-                            .startAngle(d.x0)
-                            .endAngle(d.x1));
-            });
-
-            current2.forEach( (d,i)=>{
-                g.append("path")
-                        .attr("class", "arc")
-                        .attr("fill",  colorScale(d.data.name))
-                        .attr("fill-opacity", .5)
+                            .innerRadius(0)
+                            .outerRadius(95)
+                            .padAngle(Math.min((root.x1 - root.x0) / 2, 0.005))
+                            .startAngle(root.x0)
+                            .endAngle(root.x1));
+                rootCircle.on("mouseover", function() {
+                    d3.select(this)
+                        .transition().duration(50)
                         .attr("stroke","black")
+                        .attr("stroke-width", 3)
+                });
+                rootCircle.on("mouseout", function() {
+                    d3.select(this)
+                        .transition().duration(200)
+                        .attr("stroke-width", 0)
+                });
+                rootCircle.on("click", function() {
+                    d3.select(this)
+                        .transition().duration(200)
                         .attr("stroke-width", 1)
-                        .attr("opacity", 0.5)
-                        .attr("d", d3.arc()
-                            .innerRadius(220)
-                            .outerRadius(350)
-                            .padAngle(Math.min((d.current.x1 - d.current.x0) / 2, 0.005))
-                            .startAngle(d.x0)
-                            .endAngle(d.x1));
-                console.log(d.x1 * 180 / Math.PI);
-            });
+                    console.log(this.getAttribute("name"));
+                    createSunburst(this.getAttribute("name"));
+                });
+
+                current1.forEach( (d,i)=>{
+                    let arch = g.append("path")
+                            .attr("class", "arc")
+                            .attr("fill", colorScale(d.data.name))
+                            .attr("fill-opacity", .6)
+                            .attr("stroke","black")
+                            .attr("stroke-width", 1)
+                            .attr("opacity", 0.5)
+                            .attr("name", d.data.name)
+                            .attr("d", d3.arc()
+                                .innerRadius(100)
+                                .outerRadius(200)
+                                .padAngle(Math.min((d.current.x1 - d.current.x0) / 2, 0.005))
+                                .startAngle(d.x0)
+                                .endAngle(d.x1));
+                    arch.on("mouseover", function() {
+                        d3.select(this)
+                            .transition().duration(50)
+                            .attr("stroke","black")
+                            .attr("stroke-width", 3)
+                    });
+                    arch.on("mouseout", function() {
+                        d3.select(this)
+                            .transition().duration(200)
+                            .attr("stroke-width", 1)
+                    });
+                    arch.on("click", function() {
+                        d3.select(this)
+                            .transition().duration(200)
+                            .attr("stroke-width", 1)
+                        console.log(this.getAttribute("name"));
+                        createSunburst(this.getAttribute("name"));
+                    });
+                });
+
+                current2.forEach( (d,i)=>{
+                    let arch2 = g.append("path")
+                            .attr("class", "arc")
+                            .attr("fill",  colorScale(d.data.name))
+                            .attr("fill-opacity", .5)
+                            .attr("stroke","black")
+                            .attr("stroke-width", 1)
+                            .attr("name", d.data.name)
+                            .attr("opacity", 0.5)
+                            .attr("d", d3.arc()
+                                .innerRadius(205)
+                                .outerRadius(350)
+                                .padAngle(Math.min((d.current.x1 - d.current.x0) / 2, 0.005))
+                                .startAngle(d.x0)
+                                .endAngle(d.x1));
+                    arch2.on("mouseover", function() {
+                        d3.select(this)
+                            .transition().duration(50)
+                            .attr("stroke","black")
+                            .attr("stroke-width", 3)
+                    });
+                    arch2.on("mouseout", function() {
+                        d3.select(this)
+                            .transition().duration(200)
+                            .attr("stroke-width", 1)
+                    });
+                    arch2.on("click", function() {
+                        d3.select(this)
+                            .transition().duration(200)
+                            .attr("stroke-width", 1)
+                        console.log(this.getAttribute("name"));
+                        createSunburst(this.getAttribute("name"));
+                    });
+                });
+            }
+            createSunburst(root.data.name)
+            
             
 
                         // .attr("d", d => d3.arc()
