@@ -12,9 +12,8 @@ class ZoomableSunburst extends Component {
 
         d3.json("exampleDataset.json").then( data => {
 
-            var width = 932;
+            var width = 750;
             var radius = width / 6;
-
             var currentDepth = 0; 
 
             const svg = d3.select("body").append("svg")
@@ -22,12 +21,20 @@ class ZoomableSunburst extends Component {
                 .attr("height", width)
                 .style("border", "2px solid lightgrey")
                 .style("margin", "50px")
+             
+            svg.append("text")
+                .text("pts")
+                .attr("x", width/2)
+                .attr("y", width/2)
+                .style("font-family", "sans-serif")
+                .style("dominant-baseline", "middle")
+                .style("text-anchor", "middle")
+                .style("font-size", "13px");    
 
             const root = d3.hierarchy(data)
                 .sum(d => d.value)
                 .sort((a, b) => b.value - a.value);
-            console.log(root);
-            const partition = d3.partition().size([2 * Math.PI, root.height + 1])(root)
+            var partition = d3.partition().size([2 * Math.PI, root.height + 1])(root)
 
             root.each(d => d.current = d);
 
@@ -35,7 +42,6 @@ class ZoomableSunburst extends Component {
                 .attr("transform", `translate(${width / 2},${width / 2})`);
 
             const colorScale = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
-
 
             var totalList = root.descendants();
             var currentList = root.descendants();
@@ -47,20 +53,26 @@ class ZoomableSunburst extends Component {
                 return d['depth'] == currentDepth + 2;
             });
 
-            console.log(currentList);
-
+            console.log(root);
+            var checkRoot;
+            var parentName = null;
+            parentName = root.data.name;
             
             function createSunburst(rootName){
-                d3.selectAll("g > *").remove();
+
+                var all = d3.selectAll("g > *");
+                //all.transition().duration(750).attr("opacity", 0).attr("stroke-width", 0);
+
+                all.remove();
+
                 console.log(rootName);
                 var root = totalList.filter( (d) => {
                     return d.data.name == rootName;
                 });
                 root = root[0];
-                console.log("newStart");
-                console.log(root);
+                partition = d3.partition().size([2 * Math.PI, root.height + 1])(root)
+
                 var current1 = root.children;
-                console.log(current1);
                 var current2 = [];
                 if (typeof current1 !== "undefined" && current1 != []){
                     current1.forEach( (d,i)=>{
@@ -73,7 +85,7 @@ class ZoomableSunburst extends Component {
                 }
                 console.log(current2);
                 
-                var parentName = null;
+                
                 if (root.parent !== null) {
                     parentName = root.parent.data.name;
                 }
@@ -96,28 +108,34 @@ class ZoomableSunburst extends Component {
                         .transition().duration(50)
                         .attr("stroke","black")
                         .attr("stroke-width", 3)
+                    d3.select("text").transition().duration(50).attr("opacity", 0.7);    
+                    d3.select("text").text(this.getAttribute("name"));    
                 });
                 rootCircle.on("mouseout", function() {
                     d3.select(this)
                         .transition().duration(200)
                         .attr("stroke-width", 0)
+                    d3.select("text").transition().duration(200).attr("opacity", 0);    
                 });
-                rootCircle.on("click", function() {
-                    d3.select(this)
-                        .transition().duration(200)
-                        .attr("stroke-width", 1)
-                    console.log(this.getAttribute("name"));
-                    createSunburst(this.getAttribute("name"));
-                });
+                if (root.depth != 0){
+                    rootCircle.on("click", function() {
+                        d3.select(this)
+                            .transition().duration(200)
+                            .attr("stroke-width", 1)
+                        console.log(this.getAttribute("name"));
+                        createSunburst(this.getAttribute("name"));
+                    });
+                }
+                
 
                 current1.forEach( (d,i)=>{
                     let arch = g.append("path")
                             .attr("class", "arc")
                             .attr("fill", colorScale(d.data.name))
-                            .attr("fill-opacity", .6)
+                            .attr("fill-opacity", 0)
                             .attr("stroke","black")
                             .attr("stroke-width", 1)
-                            .attr("opacity", 0.5)
+                            .attr("opacity", 0)
                             .attr("name", d.data.name)
                             .attr("d", d3.arc()
                                 .innerRadius(100)
@@ -125,23 +143,37 @@ class ZoomableSunburst extends Component {
                                 .padAngle(Math.min((d.current.x1 - d.current.x0) / 2, 0.005))
                                 .startAngle(d.x0)
                                 .endAngle(d.x1));
+                    arch.transition().duration(250).attr("fill-opacity", 0.5).attr("opacity", 0.5);
                     arch.on("mouseover", function() {
                         d3.select(this)
                             .transition().duration(50)
                             .attr("stroke","black")
                             .attr("stroke-width", 3)
+                            .attr("fill-opacity", 0.6)
+                            .attr("opacity", 0.6)
+                        d3.select("text").transition().duration(50).attr("opacity", 0.7);    
+                        d3.select("text").text(this.getAttribute("name"));        
                     });
                     arch.on("mouseout", function() {
                         d3.select(this)
                             .transition().duration(200)
                             .attr("stroke-width", 1)
+                            .attr("fill-opacity", 0.5)
+                            .attr("opacity", 0.5)
+                        d3.select("text").transition().duration(200).attr("opacity", 0);  
                     });
                     arch.on("click", function() {
                         d3.select(this)
                             .transition().duration(200)
                             .attr("stroke-width", 1)
                         console.log(this.getAttribute("name"));
-                        createSunburst(this.getAttribute("name"));
+                        checkRoot = totalList.filter( (d) => {
+                            return d.data.name == this.getAttribute("name");
+                        });
+                        checkRoot = checkRoot[0];
+                        if (typeof checkRoot.children !== "undefined"){
+                            createSunburst(this.getAttribute("name"));
+                        }    
                     });
                 });
 
@@ -149,55 +181,52 @@ class ZoomableSunburst extends Component {
                     let arch2 = g.append("path")
                             .attr("class", "arc")
                             .attr("fill",  colorScale(d.data.name))
-                            .attr("fill-opacity", .5)
+                            .attr("fill-opacity", 0)
                             .attr("stroke","black")
                             .attr("stroke-width", 1)
                             .attr("name", d.data.name)
-                            .attr("opacity", 0.5)
+                            .attr("opacity", 0)
                             .attr("d", d3.arc()
                                 .innerRadius(205)
                                 .outerRadius(350)
                                 .padAngle(Math.min((d.current.x1 - d.current.x0) / 2, 0.005))
                                 .startAngle(d.x0)
                                 .endAngle(d.x1));
+                    arch2.transition().duration(250).attr("fill-opacity", 0.5).attr("opacity", 0.5);            
                     arch2.on("mouseover", function() {
                         d3.select(this)
                             .transition().duration(50)
                             .attr("stroke","black")
                             .attr("stroke-width", 3)
+                            .attr("fill-opacity", 0.6)
+                            .attr("opacity", 0.6)
+                        d3.select("text").transition().duration(50).attr("opacity", 0.7);    
+                        d3.select("text").text(this.getAttribute("name"));    
                     });
                     arch2.on("mouseout", function() {
                         d3.select(this)
                             .transition().duration(200)
                             .attr("stroke-width", 1)
+                            .attr("fill-opacity", 0.5)
+                            .attr("opacity", 0.5)
+                        d3.select("text").transition().duration(200).attr("opacity", 0); 
                     });
                     arch2.on("click", function() {
                         d3.select(this)
                             .transition().duration(200)
                             .attr("stroke-width", 1)
                         console.log(this.getAttribute("name"));
-                        createSunburst(this.getAttribute("name"));
+                        checkRoot = totalList.filter( (d) => {
+                            return d.data.name == this.getAttribute("name");
+                        });
+                        checkRoot = checkRoot[0];
+                        if (typeof checkRoot.children !== "undefined"){
+                            createSunburst(this.getAttribute("name"));
+                        }    
                     });
                 });
             }
-            createSunburst(root.data.name)
-            
-            
-
-                        // .attr("d", d => d3.arc()
-                        // .startAngle(d.current.x0)
-                        // .endAngle(d.current.x1)
-                        // .padAngle(Math.min((d.current.x1 - d.current.x0) / 2, 0.005))
-                        // .padRadius(radius * 1.5)
-                        // .innerRadius(d.current.y0 * radius)
-                        // .outerRadius(Math.max(d.current.y0 * radius, d.current.y1 * radius - 1)));            
-            // root.each(d => d.target = {
-            //     x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-            //     x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-            //     y0: Math.max(0, d.y0 - p.depth),
-            //     y1: Math.max(0, d.y1 - p.depth)
-            // });
-
+            createSunburst(root.data.name);
         });
 
     }
