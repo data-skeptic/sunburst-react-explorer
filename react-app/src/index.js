@@ -2,11 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import Sunburst from './ZoomableSunburst';
+import InteractiveSunburst from './InteractiveSunburst';
 import reportWebVitals from './reportWebVitals';
 
 ReactDOM.render(
   <React.StrictMode>
-    <Sunburst />
+    <InteractiveSunburst></InteractiveSunburst>
   </React.StrictMode>,
   document.getElementById('root')
 );
