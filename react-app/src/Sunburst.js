@@ -11,17 +11,28 @@ const Sunburst = ({ data }) => {
     
     useEffect(() => {
         if (data && d3svg.current) {
+            
             let svg = select(d3svg.current);
 
             svg.append("text")
-                    .text("")
-                    .attr("x", width/2)
-                    .attr("y", width/2)
-                    .style("font-family", "sans-serif")
-                    .style("dominant-baseline", "middle")
-                    .style("text-anchor", "middle")
-                    .style("font-size", "13px");    
-            
+                .text("")
+                .attr("class", "name")
+                .attr("x", width/2)
+                .attr("y", width/2 - 10)
+                .style("font-family", "sans-serif")
+                .style("dominant-baseline", "middle")
+                .style("text-anchor", "middle")
+                .style("font-size", "13px");    
+            svg.append("text")
+                .text("")
+                .attr("class", "gb")
+                .attr("x", width/2)
+                .attr("y", width/2 + 10)
+                .style("font-family", "sans-serif")
+                .style("dominant-baseline", "middle")
+                .style("text-anchor", "middle")
+                .style("font-size", "13px"); 
+        
             const root = d3.hierarchy(data)
                 .sum(d => d.value)
                 .sort((a, b) => b.value - a.value);
@@ -70,6 +81,7 @@ const Sunburst = ({ data }) => {
                 if (root.parent !== null) {
                     parentName = root.parent.data.name;
                 }
+                console.log(root.value);
                 let rootCircle = g.append("path")
                         .attr("class", "arc")
                         .attr("fill", colorScale(root.data.name))
@@ -77,6 +89,8 @@ const Sunburst = ({ data }) => {
                         .attr("stroke","black")
                         .attr("stroke-width", 0)
                         .attr("name", parentName)
+                        .attr("showName", root.data.name)
+                        .attr("val", root.value)
                         .attr("opacity", 0.5)
                         .attr("d", d3.arc()
                             .innerRadius(0)
@@ -89,14 +103,16 @@ const Sunburst = ({ data }) => {
                         .transition().duration(50)
                         .attr("stroke","black")
                         .attr("stroke-width", 3)
-                    d3.select("text").transition().duration(50).attr("opacity", 0.7);    
-                    d3.select("text").text(this.getAttribute("name"));    
+                    d3.select(".name").transition().duration(50).attr("opacity", 0.7);    
+                    d3.select(".name").text(this.getAttribute("showName"));    
+                    d3.select(".gb").transition().duration(50).attr("opacity", 0.7);    
+                    d3.select(".gb").text((this.getAttribute("val")/1000) + " GB");    
                 });
                 rootCircle.on("mouseout", function() {
                     d3.select(this)
                         .transition().duration(200)
                         .attr("stroke-width", 0)
-                    d3.select("text").transition().duration(200).attr("opacity", 0);    
+                    d3.selectAll("text").transition().duration(200).attr("opacity", 0);    
                 });
                 if (root.depth != 0){
                     rootCircle.on("click", function() {
@@ -117,6 +133,7 @@ const Sunburst = ({ data }) => {
                             .attr("stroke","black")
                             .attr("stroke-width", 1)
                             .attr("opacity", 0)
+                            .attr("val", d.value)
                             .attr("name", d.data.name)
                             .attr("d", d3.arc()
                                 .innerRadius(100)
@@ -132,8 +149,10 @@ const Sunburst = ({ data }) => {
                             .attr("stroke-width", 3)
                             .attr("fill-opacity", 0.6)
                             .attr("opacity", 0.6)
-                        d3.select("text").transition().duration(50).attr("opacity", 0.7);    
-                        d3.select("text").text(this.getAttribute("name"));        
+                        d3.select(".name").transition().duration(50).attr("opacity", 0.7);    
+                        d3.select(".name").text(this.getAttribute("name"));    
+                        d3.select(".gb").transition().duration(50).attr("opacity", 0.7);    
+                        d3.select(".gb").text((this.getAttribute("val")/1000) + " GB");        
                     });
                     arch.on("mouseout", function() {
                         d3.select(this)
@@ -141,7 +160,7 @@ const Sunburst = ({ data }) => {
                             .attr("stroke-width", 1)
                             .attr("fill-opacity", 0.5)
                             .attr("opacity", 0.5)
-                        d3.select("text").transition().duration(200).attr("opacity", 0);  
+                        d3.selectAll("text").transition().duration(200).attr("opacity", 0);  
                     });
                     arch.on("click", function() {
                         d3.select(this)
@@ -166,6 +185,7 @@ const Sunburst = ({ data }) => {
                             .attr("stroke","black")
                             .attr("stroke-width", 1)
                             .attr("name", d.data.name)
+                            .attr("val", d.value)
                             .attr("opacity", 0)
                             .attr("d", d3.arc()
                                 .innerRadius(205)
@@ -181,8 +201,10 @@ const Sunburst = ({ data }) => {
                             .attr("stroke-width", 3)
                             .attr("fill-opacity", 0.6)
                             .attr("opacity", 0.6)
-                        d3.select("text").transition().duration(50).attr("opacity", 0.7);    
-                        d3.select("text").text(this.getAttribute("name"));    
+                        d3.select(".name").transition().duration(50).attr("opacity", 0.7);    
+                        d3.select(".name").text(this.getAttribute("name"));    
+                        d3.select(".gb").transition().duration(50).attr("opacity", 0.7);    
+                        d3.select(".gb").text((this.getAttribute("val")/1000) + " GB");     
                     });
                     arch2.on("mouseout", function() {
                         d3.select(this)
@@ -190,7 +212,7 @@ const Sunburst = ({ data }) => {
                             .attr("stroke-width", 1)
                             .attr("fill-opacity", 0.5)
                             .attr("opacity", 0.5)
-                        d3.select("text").transition().duration(200).attr("opacity", 0); 
+                        d3.selectAll("text").transition().duration(200).attr("opacity", 0); 
                     });
                     arch2.on("click", function() {
                         d3.select(this)
