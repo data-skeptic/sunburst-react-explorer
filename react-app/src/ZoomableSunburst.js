@@ -1,28 +1,42 @@
 import React, {Component} from 'react';
 import * as d3 from "d3";
 import { svg } from 'd3';
+//import rd3 from 'react-d3-library';
 
-class ZoomableSunburst extends Component {
+class ZoomableSunburst extends React.Component {
     componentDidMount() {
         this.drawVisualization();
     }
 
+    constructor(props) {
+        super(props);
+        this.state = {data : JSON.parse(props.data)};
+    }
+
+    UNSAFE_componentWillReceiveProps(nextProps) {
+        console.log(nextProps.data);
+        this.setState({data : JSON.parse(nextProps.data)});
+        this.drawVisualization();
+    }
       
     drawVisualization() {
 
-        d3.json("exampleDataset.json").then( data => {
+        //const RD3Component = rd3.Component;
+        //d3.json("exampleDataset.json").then( data => {
 
+            console.log(this.state.data);
+            const data = this.state.data;
             var width = 750;
             var radius = width / 6;
             var currentDepth = 0; 
 
-            const svg = d3.select("body").append("svg")
+            const svg2 = d3.select("body").append("svg")
                 .attr("width", width)
                 .attr("height", width)
                 .style("border", "2px solid lightgrey")
                 .style("margin", "50px")
              
-            svg.append("text")
+            svg2.append("text")
                 .text("pts")
                 .attr("x", width/2)
                 .attr("y", width/2)
@@ -38,7 +52,7 @@ class ZoomableSunburst extends Component {
 
             root.each(d => d.current = d);
 
-            const g = svg.append("g")
+            const g = svg2.append("g")
                 .attr("transform", `translate(${width / 2},${width / 2})`);
 
             const colorScale = d3.scaleOrdinal(d3.quantize(d3.interpolateRainbow, data.children.length + 1))
@@ -227,7 +241,8 @@ class ZoomableSunburst extends Component {
                 });
             }
             createSunburst(root.data.name);
-        });
+            //return svg2;
+        //});
 
     }
           
@@ -236,4 +251,7 @@ class ZoomableSunburst extends Component {
     }
   }
       
+
+  
+
   export default ZoomableSunburst;
