@@ -1,0 +1,284 @@
+import './App.css';
+import Sunburst from './ZoomableSunburst.js';
+import React, { useState } from 'react';
+
+const exampleData = 
+  {
+    "name": "D Drive",
+    "children": [
+      {
+        "name": "Pictures",
+        "children": [
+          {
+            "name": "New York City Trip",
+            "children": [
+              {
+                "name": "EmpireStateBuilding.png",
+                "value": 3938
+              },
+              {
+                "name": "StatueOfLiberty.png",
+                "value": 3812
+              },
+              {
+                "name": "TimeSquare.png",
+                "value": 2914
+              },
+              {
+                "name": "GroupPhoto.png",
+                "value": 4743
+              }
+            ]
+          },
+          {
+            "name": "Family Photos",
+            "children": [
+              {
+                "name": "FamilyDinner.png",
+                "value": 3534
+              },
+              {
+                "name": "FamilyDinner2.png",
+                "value": 5731
+              },
+              {
+                "name": "SkiTrip.png",
+                "value": 4840
+              },
+              {
+                "name": "Grandparents.png",
+                "value": 5914
+              },
+              {
+                "name": "Kids.png",
+                "value": 3416
+              }
+            ]
+          },
+          {
+            "name": "Art",
+            "children": [
+              {
+                "name": "StillLife.png",
+                "value": 9074
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Projects",
+        "children": [
+          {
+            "name": "GameProject",
+            "value": 12010
+          },
+          {
+            "name": "AnimationProject",
+            "value": 15842
+          },
+          {
+            "name": "Digital Art Projects",
+            "children": [
+              {
+                "name": "Art1",
+                "value": 1983
+              },
+              {
+                "name": "Art2",
+                "value": 2047
+              },
+              {
+                "name": "Art3",
+                "value": 1375
+              },
+              {
+                "name": "Art4",
+                "value": 8746
+              },
+              {
+                "name": "Art5",
+                "value": 2202
+              },
+              {
+                "name": "Art6",
+                "value": 1382
+              },
+              {
+                "name": "Art7",
+                "value": 1629
+              },
+              {
+                "name": "Art8",
+                "value": 1675
+              },
+              {
+                "name": "Art9",
+                "value": 2042
+              }
+            ]
+          },
+          {
+            "name": "CodingProject",
+            "value": 23041
+          },
+          {
+            "name": "VideoProject",
+            "value": 5176
+          }
+        ]
+      },
+      {
+        "name": "Schedule",
+        "children": [
+          {
+            "name": "ScheduleFile",
+            "value": 42116
+          }
+        ]
+      },
+      {
+        "name": "Games",
+        "children": [
+          {
+            "name": "Cities Skylines",
+            "value": 1616
+          },
+          {
+            "name": "Counter Strike",
+            "value": 1027
+          },
+          {
+            "name": "Cyberpunk 2077",
+            "value": 3891
+          },
+          {
+            "name": "Witcher 3",
+            "value": 891
+          },
+          {
+            "name": "Battlefield V",
+            "value": 2893
+          },
+          {
+            "name": "Battlefield I",
+            "value": 2103
+          },
+          {
+            "name": "Doom 2016",
+            "value": 3677
+          },
+          {
+            "name": "Doom Eternal",
+            "value": 5781
+          },
+          {
+            "name": "Dorfromantik",
+            "value": 441
+          },
+          {
+            "name": "ISLANDERS",
+            "value": 333
+          },
+          {
+            "name": "The Forest",
+            "value": 3130
+          },
+          {
+            "name": "Sons of the Forest",
+            "value": 3617
+          },
+          {
+            "name": "Rainbow Six Siege",
+            "value": 3240
+          },
+          {
+            "name": "Counter Strike Global Offensive",
+            "value": 2732
+          },
+          {
+            "name": "Counter Strike Source",
+            "value": 2039
+          }
+        ]
+      },
+      {
+        "name": "Programs",
+        "children": [
+          {
+            "name": "VS Code",
+            "value": 2105
+          },
+          {
+            "name": "Eclipse",
+            "value": 1316
+          },
+          {
+            "name": "Premiere Pro",
+            "value": 3151
+          },
+          {
+            "name": "Discord",
+            "value": 3770
+          },
+          {
+            "name": "GitHub Desktop",
+            "value": 2435
+          },
+          {
+            "name": "Steam",
+            "value": 4839
+          }
+        ]
+      },
+      {
+        "name": "Documents",
+        "children": [
+          {
+            "name": "Reminders.docx",
+            "value": 258
+          },
+          {
+            "name": "Contract.docx",
+            "value": 1001
+          },
+          {
+            "name": "Links.docx",
+            "value": 217
+          },
+          {
+            "name": "Assignments.docx",
+            "value": 2555
+          },
+          {
+            "name": "Essays",
+            "children": [
+              {
+                "name": "CSEssay.docx",
+                "value": 354
+              },
+              {
+                "name": "EnglishEssay.docx",
+                "value": 1233
+              }
+            ]
+          }
+        ]
+      }
+    ]
+};
+
+
+
+const Editor = () => {
+  const [value, setValue] = useState(JSON.stringify(exampleData, null, '\t'));
+
+  return (
+    <div>
+      <textarea id="myTextArea" rows = "47" cols = "100" onChange ={event => setValue(event.target.value)} >{value}</textarea>
+      <Sunburst data = {value}/>
+    </div>
+  );
+};
+
+export default Editor;
